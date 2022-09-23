@@ -37,7 +37,7 @@ func main(){
   var int edad MAL
   1apellido := 6 MAL
   var licencia_de_conducir = true BIEN
-  var estatura de la persona int BIEN
+  var estatura de la persona int MAL
   cantidadDeHijos := 2 BIEN 
 
 	*/
