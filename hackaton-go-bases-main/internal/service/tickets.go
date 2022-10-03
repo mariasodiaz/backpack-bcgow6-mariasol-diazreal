@@ -34,6 +34,7 @@ func (b *bookings) Create(t Ticket) (Ticket, error) {
 	if (t == Ticket{}) {
 		return t, errors.New("ticket is empty")
 	}
+	b.Tickets = append(b.Tickets, t)
 	return Ticket{
 		Id:          t.Id,
 		Names:       t.Names,
@@ -55,10 +56,15 @@ func (b *bookings) Read(id int) (Ticket, error) {
 }
 
 func (b *bookings) Update(id int, t Ticket) (Ticket, error) {
-	_, err := b.Read(id)
+	element, err := b.Read(id)
 	if err != nil {
 		return Ticket{}, errors.New("no se encontro el id a actualizar")
 	}
+	element.Names = t.Names
+	element.Email = t.Email
+	element.Destination = t.Destination
+	element.Date = t.Date
+	element.Price = t.Price
 
 	return t, nil
 }
