@@ -4,19 +4,20 @@ import (
 	"encoding/json"
 	"errors"
 	"io/ioutil"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
 
 type Product struct {
-	Id        int
-	Name      string
-	Color     string
-	Price     int
-	Stock     int
-	Code      string
-	Published bool
-	Date      string
+	Id        int    `json:"id"`
+	Name      string `json:"name"`
+	Color     string `json:"color"`
+	Price     int    `json:"price"`
+	Stock     int    `json:"stock"`
+	Code      string `json:"code"`
+	Published bool   `json:"published"`
+	Date      string `json:"date"`
 }
 
 var products = []Product{
@@ -34,19 +35,42 @@ func GetProducts() ([]Product, error) {
 	var products []Product
 	raw, err := ioutil.ReadFile("./products.json")
 	if err != nil {
-		return nil, errors.New("Hubo un error al leer el archivo")
+		return nil, errors.New("hubo un error al leer el archivo")
 	}
 	json.Unmarshal(raw, &products)
 	return products, nil
 }
 
 func GetAll1(context *gin.Context) {
-	products, err := GetProducts()
-	if err == nil {
-		context.JSON(200, products)
+	products, _ := GetProducts()
+	var filtrados []*Product
+
+	for _, value := range products {
+		price, _ := strconv.Atoi(context.Query("price"))
+		stock, _ := strconv.Atoi(context.Query("stock"))
+		published, _ := strconv.ParseBool(context.Query("published"))
+		if context.Query("name") == value.Name && context.Query("color") == value.Color && price == value.Price && stock == value.Stock && context.Query("code") == value.Code && published == value.Published && context.Query("date") == value.Date {
+			filtrados = append(filtrados, &value)
+		}
+	}
+	if len(filtrados) != 0 {
+		context.JSON(200, filtrados)
 	}
 }
 
+func GetById(context *gin.Context) {
+	products, _ := GetProducts()
+	id, _ := strconv.Atoi(context.Param("id"))
+
+	for _, value := range products {
+		if value.Id == id {
+			context.JSON(200, value)
+			return
+		}
+	}
+	context.JSON(404, "id no encontrado")
+
+}
 func main() {
 	router := gin.Default()
 	router.GET("./saludar", func(context *gin.Context) {
@@ -56,6 +80,7 @@ func main() {
 	})
 
 	router.GET("./productos", GetAll1)
+	router.GET("./productos/:id", GetById)
 
 	router.Run()
 }
