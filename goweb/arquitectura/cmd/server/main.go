@@ -1,4 +1,4 @@
-package server
+package main
 
 import (
 	"github.com/gin-gonic/gin"
@@ -14,6 +14,12 @@ func main() {
 
 	router := gin.Default()
 
-	router.GET("./products", product.GetAll())
-	router.POST("./products", product.Store())
+	r := router.Group("./products")
+	r.GET("/", product.GetAll())
+	r.POST("/", product.Store())
+	r.PUT("/:id", product.Update())
+	r.DELETE("/:id", product.Delete())
+	r.PATCH("/:id", product.UpdateMany())
+
+	router.Run()
 }
