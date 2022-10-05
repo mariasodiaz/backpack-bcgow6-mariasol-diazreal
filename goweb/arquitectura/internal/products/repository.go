@@ -1,10 +1,13 @@
 package products
 
-import "errors"
+import (
+	"errors"
+
+	"github.com/mariasodiaz/backpack-bcgow6-mariasol-diazreal/goweb/arquitectura/pkg/store"
+)
 
 type Repository interface {
 	GetAll() ([]Product, error)
-	GetById(id int) (Product, error)
 	Store(id int, name string, color string, price int, stock int, code string, published bool, date string) (Product, error)
 	LastId() (int, error)
 	Update(id int, name string, color string, price int, stock int, code string, published bool, date string) (Product, error)
@@ -13,6 +16,7 @@ type Repository interface {
 }
 
 type repository struct {
+	db store.Store
 }
 
 type Product struct {
@@ -28,45 +32,45 @@ type Product struct {
 
 var errorIdNotFound = errors.New("id not found")
 
-var products = []Product{
-	{Id: 1, Name: "Cama", Color: "Blanco", Price: 150000, Stock: 5, Code: "AF289A", Published: true, Date: "20/09/2022"},
-	{Id: 2, Name: "Televisor", Color: "Negro", Price: 200000, Stock: 1, Code: "AF289A", Published: false, Date: "22/09/2022"},
-	{Id: 3, Name: "Cocina", Color: "Plateado", Price: 80000, Stock: 3, Code: "BE224A", Published: true, Date: "01/01/2022"},
-	{Id: 4, Name: "Plancha", Color: "Blanco", Price: 200000, Stock: 10, Code: "CL208D", Published: true, Date: "15/04/2022"},
-}
-var lastId int = 4
-
-func NewRepository() Repository {
-	return &repository{}
+func NewRepository(db store.Store) Repository {
+	return &repository{
+		db: db,
+	}
 }
 
 func (r *repository) GetAll() ([]Product, error) {
+	var products = []Product{}
+	r.db.Read(&products)
 	return products, nil
 }
 
 func (r *repository) LastId() (int, error) {
-	return lastId, nil
+	var products = []Product{}
+	if err := r.db.Read(&products); err != nil {
+		return 0, err
+	}
+	if len(products) == 0 {
+		return 0, nil
+	}
+	return products[len(products)-1].Id, nil
 }
 
 func (r *repository) Store(id int, name string, color string, price int, stock int, code string, published bool, date string) (Product, error) {
-	lastId = id
 	product := Product{Id: id, Name: name, Color: color, Price: price, Stock: stock, Code: code, Published: published, Date: date}
+	var products = []Product{}
+	r.db.Read(&products)
 	products = append(products, product)
-	return product, nil
-}
-
-func (r *repository) GetById(id int) (Product, error) {
-	for _, value := range products {
-		if value.Id == id {
-			return value, nil
-		}
+	if err := r.db.Write(products); err != nil {
+		return Product{}, err
 	}
-	return Product{}, errorIdNotFound
+	return product, nil
 }
 
 func (r *repository) Update(id int, name string, color string, price int, stock int, code string, published bool, date string) (Product, error) {
 	newProduct := Product{Name: name, Color: color, Price: price, Stock: stock, Code: code, Published: published, Date: date}
 	var updated bool = false
+	var products = []Product{}
+	r.db.Read(&products)
 	for i := range products {
 		if products[i].Id == id {
 			newProduct.Id = id
@@ -74,15 +78,19 @@ func (r *repository) Update(id int, name string, color string, price int, stock 
 			updated = true
 		}
 	}
-
 	if !updated {
 		return Product{}, errorIdNotFound
+	}
+	if err := r.db.Write(products); err != nil {
+		return Product{}, err
 	}
 	return newProduct, nil
 }
 
 func (r *repository) Delete(id int) error {
 	var pos int = -1
+	var products = []Product{}
+	r.db.Read(&products)
 	for i := range products {
 		if products[i].Id == id {
 			pos = i
@@ -92,12 +100,17 @@ func (r *repository) Delete(id int) error {
 		return errorIdNotFound
 	}
 	products = append(products[:pos], products[pos+1:]...)
+	if err := r.db.Write(products); err != nil {
+		return err
+	}
 	return nil
 }
 
 func (r *repository) UpdateMany(id int, name string, price int) (Product, error) {
 	var updated bool = false
 	var product Product
+	var products = []Product{}
+	r.db.Read(&products)
 	for i := range products {
 		if products[i].Id == id {
 			products[i].Name = name
@@ -109,6 +122,9 @@ func (r *repository) UpdateMany(id int, name string, price int) (Product, error)
 
 	if !updated {
 		return Product{}, errorIdNotFound
+	}
+	if err := r.db.Write(products); err != nil {
+		return Product{}, err
 	}
 	return product, nil
 }

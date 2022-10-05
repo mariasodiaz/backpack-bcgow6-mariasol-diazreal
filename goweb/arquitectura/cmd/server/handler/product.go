@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"os"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -32,7 +33,7 @@ func NewProduct(s products.Service) *Product {
 func (p *Product) GetAll() gin.HandlerFunc {
 	return func(context *gin.Context) {
 		tokenReq := context.GetHeader("token")
-		if tokenReq != "12345" {
+		if tokenReq != os.Getenv("TOKEN") {
 			context.JSON(http.StatusUnauthorized, gin.H{"error": errorPeticion})
 			return
 		}
@@ -47,7 +48,7 @@ func (p *Product) GetAll() gin.HandlerFunc {
 func (p *Product) Store() gin.HandlerFunc {
 	return func(context *gin.Context) {
 		tokenReq := context.GetHeader("token")
-		if tokenReq != "12345" {
+		if tokenReq != os.Getenv("TOKEN") {
 			context.JSON(http.StatusUnauthorized, gin.H{"error": errorPeticion})
 			return
 		}
@@ -68,7 +69,7 @@ func (p *Product) Store() gin.HandlerFunc {
 func (p *Product) Update() gin.HandlerFunc {
 	return func(context *gin.Context) {
 		tokenReq := context.GetHeader("token")
-		if tokenReq != "12345" {
+		if tokenReq != os.Getenv("TOKEN") {
 			context.JSON(http.StatusUnauthorized, gin.H{"error": errorPeticion})
 			return
 		}
@@ -113,7 +114,7 @@ func (p *Product) Update() gin.HandlerFunc {
 func (p *Product) Delete() gin.HandlerFunc {
 	return func(context *gin.Context) {
 		tokenReq := context.GetHeader("token")
-		if tokenReq != "12345" {
+		if tokenReq != os.Getenv("TOKEN") {
 			context.JSON(http.StatusUnauthorized, gin.H{"error": errorPeticion})
 			return
 		}
@@ -129,7 +130,7 @@ func (p *Product) Delete() gin.HandlerFunc {
 func (p *Product) UpdateMany() gin.HandlerFunc {
 	return func(context *gin.Context) {
 		tokenReq := context.GetHeader("token")
-		if tokenReq != "12345" {
+		if tokenReq != os.Getenv("TOKEN") {
 			context.JSON(http.StatusUnauthorized, gin.H{"error": errorPeticion})
 			return
 		}

@@ -2,7 +2,6 @@ package products
 
 type Service interface {
 	GetAll() ([]Product, error)
-	GetById(id int) (Product, error)
 	Store(name string, color string, price int, stock int, code string, published bool, date string) (Product, error)
 	Update(id int, name string, color string, price int, stock int, code string, published bool, date string) (Product, error)
 	Delete(id int) error
@@ -32,14 +31,6 @@ func (s *service) Store(name string, color string, price int, stock int, code st
 	}
 	id++
 	product, err := s.repository.Store(id, name, color, price, stock, code, published, date)
-	if err != nil {
-		return Product{}, err
-	}
-	return product, nil
-}
-
-func (s *service) GetById(id int) (Product, error) {
-	product, err := s.repository.GetById(id)
 	if err != nil {
 		return Product{}, err
 	}
