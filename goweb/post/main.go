@@ -7,13 +7,14 @@ import (
 )
 
 type PedidoRequest struct {
-	Id    int    `json:"id"`
-	Name  string `json:"name" binding:"required"`
-	Color string `json:"color" binding:"required"`
-	Price int    `json:"price" binding:"required"`
-	Stock int    `json:"stock" binding:"required"`
-	Code  string `json:"code" binding:"required"`
-	Date  string `json:"date" binding:"required"`
+	Id        int    `json:"id"`
+	Name      string `json:"name" binding:"required"`
+	Color     string `json:"color" binding:"required"`
+	Price     int    `json:"price" binding:"required"`
+	Stock     int    `json:"stock" binding:"required"`
+	Code      string `json:"code" binding:"required"`
+	Published bool   `json:"published" binding:"required"`
+	Date      string `json:"date" binding:"required"`
 }
 
 var requests []PedidoRequest
