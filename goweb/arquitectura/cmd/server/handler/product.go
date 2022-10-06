@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/mariasodiaz/backpack-bcgow6-mariasol-diazreal/goweb/arquitectura/internal/products"
+	"github.com/mariasodiaz/backpack-bcgow6-mariasol-diazreal/goweb/arquitectura/pkg/web"
 )
 
 type ProductRequest struct {
@@ -34,27 +35,53 @@ func (p *Product) GetAll() gin.HandlerFunc {
 	return func(context *gin.Context) {
 		tokenReq := context.GetHeader("token")
 		if tokenReq != os.Getenv("TOKEN") {
-			context.JSON(http.StatusUnauthorized, gin.H{"error": errorPeticion})
+			context.JSON(http.StatusUnauthorized, web.NewResponse(http.StatusUnauthorized, nil, errorPeticion))
 			return
 		}
 		products, err := p.service.GetAll()
 		if err != nil {
 			context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		}
-		context.JSON(http.StatusOK, products)
+		context.JSON(http.StatusOK, web.NewResponse(http.StatusOK, products, ""))
 	}
+}
+func (p *Product) validar(context *gin.Context, req ProductRequest) string {
+	if req.Name == "" {
+		return "el nombre es requerido"
+	}
+	if req.Color == "" {
+		return "el color es requerido"
+	}
+	if req.Price == 0 {
+		return "el precio es requerido"
+	}
+	if req.Stock == 0 {
+		return "el stock es requerido"
+	}
+	if req.Code == "" {
+		return "el codigo es requerido"
+	}
+	if req.Date == "" {
+		return "la fecha es requerida"
+	}
+	return ""
 }
 
 func (p *Product) Store() gin.HandlerFunc {
 	return func(context *gin.Context) {
 		tokenReq := context.GetHeader("token")
 		if tokenReq != os.Getenv("TOKEN") {
-			context.JSON(http.StatusUnauthorized, gin.H{"error": errorPeticion})
+			context.JSON(http.StatusUnauthorized, web.NewResponse(http.StatusUnauthorized, nil, errorPeticion))
 			return
 		}
 		var req ProductRequest
 		if err := context.ShouldBindJSON(&req); err != nil {
-			context.JSON(http.StatusBadRequest, gin.H{"error": "hay un campo vacio"})
+			context.JSON(http.StatusBadRequest, web.NewResponse(http.StatusBadRequest, nil, err.Error()))
+			return
+		}
+		errValidacion := p.validar(context, req)
+		if errValidacion != "" {
+			context.JSON(http.StatusBadRequest, web.NewResponse(http.StatusBadRequest, nil, errValidacion))
 			return
 		}
 		product, err := p.service.Store(req.Name, req.Color, req.Price, req.Stock, req.Code, req.Published, req.Date)
@@ -62,7 +89,7 @@ func (p *Product) Store() gin.HandlerFunc {
 			context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
-		context.JSON(http.StatusOK, product)
+		context.JSON(http.StatusOK, web.NewResponse(http.StatusOK, product, ""))
 	}
 }
 
@@ -70,44 +97,25 @@ func (p *Product) Update() gin.HandlerFunc {
 	return func(context *gin.Context) {
 		tokenReq := context.GetHeader("token")
 		if tokenReq != os.Getenv("TOKEN") {
-			context.JSON(http.StatusUnauthorized, gin.H{"error": errorPeticion})
+			context.JSON(http.StatusUnauthorized, web.NewResponse(http.StatusUnauthorized, nil, errorPeticion))
 			return
 		}
 		id, _ := strconv.Atoi(context.Param("id"))
 		var req ProductRequest
 		if err := context.ShouldBindJSON(&req); err != nil {
-			context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			context.JSON(http.StatusBadRequest, web.NewResponse(http.StatusBadRequest, nil, err.Error()))
 			return
 		}
-		if req.Name == "" {
-			context.JSON(http.StatusBadRequest, gin.H{"error": "El nombre del producto es requerido"})
-			return
-		}
-		if req.Color == "" {
-			context.JSON(http.StatusBadRequest, gin.H{"error": "El color del producto es requerido"})
-			return
-		}
-		if req.Price == 0 {
-			context.JSON(http.StatusBadRequest, gin.H{"error": "El precio es requerido"})
-			return
-		}
-		if req.Stock == 0 {
-			context.JSON(http.StatusBadRequest, gin.H{"error": "El stock es requerido"})
-			return
-		}
-		if req.Code == "" {
-			context.JSON(http.StatusBadRequest, gin.H{"error": "El codigo es requerido"})
-			return
-		}
-		if req.Date == "" {
-			context.JSON(http.StatusBadRequest, gin.H{"error": "La fecha es requerida"})
+		errValidacion := p.validar(context, req)
+		if errValidacion != "" {
+			context.JSON(http.StatusBadRequest, web.NewResponse(http.StatusBadRequest, nil, errValidacion))
 			return
 		}
 		product, err := p.service.Update(id, req.Name, req.Color, req.Price, req.Stock, req.Code, false, req.Date)
 		if err != nil {
 			context.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		}
-		context.JSON(http.StatusOK, product)
+		context.JSON(http.StatusOK, web.NewResponse(http.StatusOK, product, ""))
 	}
 }
 
@@ -115,7 +123,7 @@ func (p *Product) Delete() gin.HandlerFunc {
 	return func(context *gin.Context) {
 		tokenReq := context.GetHeader("token")
 		if tokenReq != os.Getenv("TOKEN") {
-			context.JSON(http.StatusUnauthorized, gin.H{"error": errorPeticion})
+			context.JSON(http.StatusUnauthorized, web.NewResponse(http.StatusUnauthorized, nil, errorPeticion))
 			return
 		}
 		id, _ := strconv.Atoi(context.Param("id"))
@@ -123,7 +131,7 @@ func (p *Product) Delete() gin.HandlerFunc {
 		if err != nil {
 			context.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		}
-		context.JSON(http.StatusNoContent, gin.H{"data": "el producto se ha eliminado correctamente"})
+		context.JSON(http.StatusNoContent, web.NewResponse(http.StatusNoContent, "el producto se ha eliminado correctamente", ""))
 	}
 }
 
@@ -131,19 +139,19 @@ func (p *Product) UpdateMany() gin.HandlerFunc {
 	return func(context *gin.Context) {
 		tokenReq := context.GetHeader("token")
 		if tokenReq != os.Getenv("TOKEN") {
-			context.JSON(http.StatusUnauthorized, gin.H{"error": errorPeticion})
+			context.JSON(http.StatusUnauthorized, web.NewResponse(http.StatusUnauthorized, nil, errorPeticion))
 			return
 		}
 		id, _ := strconv.Atoi(context.Param("id"))
 		var req ProductRequest
 		if err := context.ShouldBindJSON(&req); err != nil {
-			context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			context.JSON(http.StatusBadRequest, web.NewResponse(http.StatusBadRequest, nil, err.Error()))
 			return
 		}
 		product, err := p.service.UpdateMany(id, req.Name, req.Price)
 		if err != nil {
 			context.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		}
-		context.JSON(http.StatusOK, product)
+		context.JSON(http.StatusOK, web.NewResponse(http.StatusOK, product, ""))
 	}
 }
