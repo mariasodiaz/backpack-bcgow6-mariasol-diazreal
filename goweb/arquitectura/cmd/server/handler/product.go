@@ -31,6 +31,15 @@ func NewProduct(s products.Service) *Product {
 	return &Product{service: s}
 }
 
+// ListProducts godoc
+// @Summary     List products
+// @Tags        Products
+// @Description get products
+// @Produce     json
+// @Param       token header   string true "token"
+// @Success     200   {object} web.Response
+// @Failure     401   {object} web.Response
+// @Router      /products [get]
 func (p *Product) GetAll() gin.HandlerFunc {
 	return func(context *gin.Context) {
 		tokenReq := context.GetHeader("token")
@@ -67,6 +76,18 @@ func (p *Product) validar(context *gin.Context, req ProductRequest) string {
 	return ""
 }
 
+// StoreProducts godoc
+// @Summary     Store products
+// @Tags        Products
+// @Description store products
+// @Accept      json
+// @Produce     json
+// @Param       token   header   string  true "token"
+// @Param       product body     ProductRequest true "Product to store"
+// @Success     200     {object} web.Response
+// @Failure     401     {object} web.Response
+// @Failure     400     {object} web.Response
+// @Router      /products [post]
 func (p *Product) Store() gin.HandlerFunc {
 	return func(context *gin.Context) {
 		tokenReq := context.GetHeader("token")
@@ -131,7 +152,7 @@ func (p *Product) Delete() gin.HandlerFunc {
 		if err != nil {
 			context.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		}
-		context.JSON(http.StatusNoContent, web.NewResponse(http.StatusNoContent, "el producto se ha eliminado correctamente", ""))
+		context.JSON(http.StatusNoContent, web.NewResponse(http.StatusNoContent, nil, ""))
 	}
 }
 

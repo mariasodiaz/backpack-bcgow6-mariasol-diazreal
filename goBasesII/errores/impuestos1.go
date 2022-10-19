@@ -9,7 +9,7 @@ type SalaryError struct{
 }
 
 func (e *SalaryError) Error() string{
-	return fmt.Sprintf("%v - %v\n",e.status,e.message)
+	return fmt.Sprintf("%v - %v\n",e.status,e.message) //puedo retornar solo el error y ya 
 }
 
 func AplicaImpuesto (salary int) (int,error){
