@@ -28,32 +28,30 @@ func (s StubDB) Write(data interface{}) error {
 }
 
 func TestGetAll(t *testing.T) {
-	var products []Product
-
-	newProduct := Product{
-		Id:    1,
-		Name:  "Computadora",
-		Color: "Gris",
-		Price: 120000,
-		Stock: 2,
-		Code:  "AF662",
+	products := []Product{
+		{
+			Id:    1,
+			Name:  "Computadora",
+			Color: "Gris",
+			Price: 120000,
+			Stock: 2,
+			Code:  "AF662",
+		}, {
+			Id:    2,
+			Name:  "Televisor",
+			Color: "Negro",
+			Price: 300000,
+			Stock: 1,
+			Code:  "AB769",
+		},
 	}
-	newProduct2 := Product{
-		Id:    2,
-		Name:  "Televisor",
-		Color: "Negro",
-		Price: 300000,
-		Stock: 1,
-		Code:  "AB769",
-	}
-
-	products = append(products, newProduct)
-	products = append(products, newProduct2)
 
 	myStubDB := StubDB{products}
 	motor := NewRepository(&myStubDB)
 
-	result, _ := motor.GetAll()
+	result, err := motor.GetAll()
+
+	assert.Nil(t, err)
 	assert.Equal(t, products, result)
 
 }
@@ -78,9 +76,10 @@ func TestUpdate(t *testing.T) {
 	myMockDB := MockDB{ReadWasCalled: false, BeforeUpdate: Update, AfterUpdate: Updated, Products: products}
 	motor := NewRepository(&myMockDB)
 
-	productUpdated, _ := motor.UpdateMany(Update.Id, Updated.Name, Updated.Price)
+	productUpdated, err := motor.UpdateMany(Update.Id, Updated.Name, Updated.Price)
 
+	assert.Nil(t, err)
 	assert.Equal(t, Updated, productUpdated)
-	//assert.True(t, myMockDB.ReadWasCalled)
+	assert.True(t, myMockDB.ReadWasCalled)
 
 }
