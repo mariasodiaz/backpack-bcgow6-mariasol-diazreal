@@ -3,22 +3,23 @@ package products
 import (
 	"testing"
 
+	"github.com/mariasodiaz/backpack-bcgow6-mariasol-diazreal/go-testing/tipostest/internal/domain"
 	"github.com/stretchr/testify/assert"
 )
 
 type StubDB struct {
-	Products []Product
+	Products []domain.Product
 }
 
 type MockDB struct {
 	ReadWasCalled bool
-	BeforeUpdate  Product
-	AfterUpdate   Product
-	Products      []Product
+	BeforeUpdate  domain.Product
+	AfterUpdate   domain.Product
+	Products      []domain.Product
 }
 
 func (s StubDB) Read(data interface{}) error {
-	a := data.(*[]Product)
+	a := data.(*[]domain.Product)
 	*a = s.Products
 	return nil
 }
@@ -28,7 +29,7 @@ func (s StubDB) Write(data interface{}) error {
 }
 
 func TestGetAll(t *testing.T) {
-	products := []Product{
+	products := []domain.Product{
 		{
 			Id:    1,
 			Name:  "Computadora",
@@ -58,21 +59,21 @@ func TestGetAll(t *testing.T) {
 
 func (m *MockDB) Read(data interface{}) error {
 	m.ReadWasCalled = true
-	a := data.(*[]Product)
+	a := data.(*[]domain.Product)
 	*a = m.Products
 	return nil
 }
 
 func (m *MockDB) Write(data interface{}) error {
-	a := data.([]Product)
+	a := data.([]domain.Product)
 	m.Products = append(m.Products, a[len(a)-1])
 	return nil
 }
 
 func TestUpdate(t *testing.T) {
-	Update := Product{Id: 1, Name: "Computadora", Price: 230000}
-	Updated := Product{Id: 1, Name: "Televisor", Price: 180000}
-	products := []Product{Update}
+	Update := domain.Product{Id: 1, Name: "Computadora", Price: 230000}
+	Updated := domain.Product{Id: 1, Name: "Televisor", Price: 180000}
+	products := []domain.Product{Update}
 	myMockDB := MockDB{ReadWasCalled: false, BeforeUpdate: Update, AfterUpdate: Updated, Products: products}
 	motor := NewRepository(&myMockDB)
 

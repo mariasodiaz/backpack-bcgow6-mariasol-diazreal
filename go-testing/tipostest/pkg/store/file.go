@@ -3,6 +3,8 @@ package store
 import (
 	"encoding/json"
 	"os"
+
+	"github.com/mariasodiaz/backpack-bcgow6-mariasol-diazreal/go-testing/tipostest/internal/domain"
 )
 
 type Type string
@@ -10,6 +12,12 @@ type Type string
 type Store interface {
 	Read(data interface{}) error
 	Write(data interface{}) error
+}
+
+type MockStorage struct {
+	ReadWasCalled bool
+	Products      []domain.Product
+	Error         error
 }
 
 const (
@@ -27,6 +35,19 @@ func New(store Type, fileName string) Store {
 			fileName,
 		}
 	}
+	return nil
+}
+
+func (m *MockStorage) Read(data interface{}) error {
+	m.ReadWasCalled = true
+	a := data.(*[]domain.Product)
+	*a = m.Products
+	return nil
+}
+
+func (m *MockStorage) Write(data interface{}) error {
+	a := data.([]domain.Product)
+	m.Products = append(m.Products, a[len(a)-1])
 	return nil
 }
 

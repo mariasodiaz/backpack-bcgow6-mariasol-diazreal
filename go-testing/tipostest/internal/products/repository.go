@@ -3,31 +3,21 @@ package products
 import (
 	"errors"
 
+	"github.com/mariasodiaz/backpack-bcgow6-mariasol-diazreal/go-testing/tipostest/internal/domain"
 	"github.com/mariasodiaz/backpack-bcgow6-mariasol-diazreal/go-testing/tipostest/pkg/store"
 )
 
 type Repository interface {
-	GetAll() ([]Product, error)
-	Store(id int, name string, color string, price int, stock int, code string, published bool, date string) (Product, error)
+	GetAll() ([]domain.Product, error)
+	Store(id int, name string, color string, price int, stock int, code string, published bool, date string) (domain.Product, error)
 	LastId() (int, error)
-	Update(id int, name string, color string, price int, stock int, code string, published bool, date string) (Product, error)
+	Update(id int, name string, color string, price int, stock int, code string, published bool, date string) (domain.Product, error)
 	Delete(id int) error
-	UpdateMany(id int, name string, price int) (Product, error)
+	UpdateMany(id int, name string, price int) (domain.Product, error)
 }
 
 type repository struct {
 	db store.Store
-}
-
-type Product struct {
-	Id        int    `json:"id"`
-	Name      string `json:"name"`
-	Color     string `json:"color"`
-	Price     int    `json:"price"`
-	Stock     int    `json:"stock"`
-	Code      string `json:"code"`
-	Published bool   `json:"published"`
-	Date      string `json:"date"`
 }
 
 var errorIdNotFound = errors.New("id not found")
@@ -38,14 +28,14 @@ func NewRepository(db store.Store) Repository {
 	}
 }
 
-func (r *repository) GetAll() ([]Product, error) {
-	var products = []Product{}
+func (r *repository) GetAll() ([]domain.Product, error) {
+	var products = []domain.Product{}
 	r.db.Read(&products)
 	return products, nil
 }
 
 func (r *repository) LastId() (int, error) {
-	var products = []Product{}
+	var products = []domain.Product{}
 	if err := r.db.Read(&products); err != nil {
 		return 0, err
 	}
@@ -55,21 +45,21 @@ func (r *repository) LastId() (int, error) {
 	return products[len(products)-1].Id, nil
 }
 
-func (r *repository) Store(id int, name string, color string, price int, stock int, code string, published bool, date string) (Product, error) {
-	product := Product{Id: id, Name: name, Color: color, Price: price, Stock: stock, Code: code, Published: published, Date: date}
-	var products = []Product{}
+func (r *repository) Store(id int, name string, color string, price int, stock int, code string, published bool, date string) (domain.Product, error) {
+	product := domain.Product{Id: id, Name: name, Color: color, Price: price, Stock: stock, Code: code, Published: published, Date: date}
+	var products = []domain.Product{}
 	r.db.Read(&products)
 	products = append(products, product)
 	if err := r.db.Write(products); err != nil {
-		return Product{}, err
+		return domain.Product{}, err
 	}
 	return product, nil
 }
 
-func (r *repository) Update(id int, name string, color string, price int, stock int, code string, published bool, date string) (Product, error) {
-	newProduct := Product{Name: name, Color: color, Price: price, Stock: stock, Code: code, Published: published, Date: date}
+func (r *repository) Update(id int, name string, color string, price int, stock int, code string, published bool, date string) (domain.Product, error) {
+	newProduct := domain.Product{Name: name, Color: color, Price: price, Stock: stock, Code: code, Published: published, Date: date}
 	var updated bool = false
-	var products = []Product{}
+	var products = []domain.Product{}
 	r.db.Read(&products)
 	for i := range products {
 		if products[i].Id == id {
@@ -79,17 +69,17 @@ func (r *repository) Update(id int, name string, color string, price int, stock 
 		}
 	}
 	if !updated {
-		return Product{}, errorIdNotFound
+		return domain.Product{}, errorIdNotFound
 	}
 	if err := r.db.Write(products); err != nil {
-		return Product{}, err
+		return domain.Product{}, err
 	}
 	return newProduct, nil
 }
 
 func (r *repository) Delete(id int) error {
 	var pos int = -1
-	var products = []Product{}
+	var products = []domain.Product{}
 	r.db.Read(&products)
 	for i := range products {
 		if products[i].Id == id {
@@ -106,10 +96,10 @@ func (r *repository) Delete(id int) error {
 	return nil
 }
 
-func (r *repository) UpdateMany(id int, name string, price int) (Product, error) {
+func (r *repository) UpdateMany(id int, name string, price int) (domain.Product, error) {
 	var updated bool = false
-	var product Product
-	var products = []Product{}
+	var product domain.Product
+	var products = []domain.Product{}
 	r.db.Read(&products)
 	for i := range products {
 		if products[i].Id == id {
@@ -121,10 +111,10 @@ func (r *repository) UpdateMany(id int, name string, price int) (Product, error)
 	}
 
 	if !updated {
-		return Product{}, errorIdNotFound
+		return domain.Product{}, errorIdNotFound
 	}
 	if err := r.db.Write(products); err != nil {
-		return Product{}, err
+		return domain.Product{}, err
 	}
 	return product, nil
 }

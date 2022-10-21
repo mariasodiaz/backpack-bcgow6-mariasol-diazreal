@@ -1,11 +1,15 @@
 package products
 
+import (
+	"github.com/mariasodiaz/backpack-bcgow6-mariasol-diazreal/go-testing/tipostest/internal/domain"
+)
+
 type Service interface {
-	GetAll() ([]Product, error)
-	Store(name string, color string, price int, stock int, code string, published bool, date string) (Product, error)
-	Update(id int, name string, color string, price int, stock int, code string, published bool, date string) (Product, error)
+	GetAll() ([]domain.Product, error)
+	Store(name string, color string, price int, stock int, code string, published bool, date string) (domain.Product, error)
+	Update(id int, name string, color string, price int, stock int, code string, published bool, date string) (domain.Product, error)
 	Delete(id int) error
-	UpdateMany(id int, name string, price int) (Product, error)
+	UpdateMany(id int, name string, price int) (domain.Product, error)
 }
 
 type service struct {
@@ -16,7 +20,7 @@ func NewService(r Repository) Service {
 	return &service{repository: r}
 }
 
-func (s *service) GetAll() ([]Product, error) {
+func (s *service) GetAll() ([]domain.Product, error) {
 	products, err := s.repository.GetAll()
 	if err != nil {
 		return nil, err
@@ -24,23 +28,23 @@ func (s *service) GetAll() ([]Product, error) {
 	return products, nil
 }
 
-func (s *service) Store(name string, color string, price int, stock int, code string, published bool, date string) (Product, error) {
+func (s *service) Store(name string, color string, price int, stock int, code string, published bool, date string) (domain.Product, error) {
 	id, err := s.repository.LastId()
 	if err != nil {
-		return Product{}, err
+		return domain.Product{}, err
 	}
 	id++
 	product, err := s.repository.Store(id, name, color, price, stock, code, published, date)
 	if err != nil {
-		return Product{}, err
+		return domain.Product{}, err
 	}
 	return product, nil
 }
 
-func (s *service) Update(id int, name string, color string, price int, stock int, code string, published bool, date string) (Product, error) {
+func (s *service) Update(id int, name string, color string, price int, stock int, code string, published bool, date string) (domain.Product, error) {
 	product, err := s.repository.Update(id, name, color, price, stock, code, published, date)
 	if err != nil {
-		return Product{}, err
+		return domain.Product{}, err
 	}
 	return product, nil
 }
@@ -53,10 +57,10 @@ func (s *service) Delete(id int) error {
 	return nil
 }
 
-func (s *service) UpdateMany(id int, name string, price int) (Product, error) {
+func (s *service) UpdateMany(id int, name string, price int) (domain.Product, error) {
 	product, err := s.repository.UpdateMany(id, name, price)
 	if err != nil {
-		return Product{}, err
+		return domain.Product{}, err
 	}
 	return product, nil
 }
