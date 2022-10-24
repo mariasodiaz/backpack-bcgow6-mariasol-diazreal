@@ -31,9 +31,7 @@ type fileStore struct {
 func New(store Type, fileName string) Store {
 	switch store {
 	case FileType:
-		return &fileStore{
-			fileName,
-		}
+		return &fileStore{fileName}
 	}
 	return nil
 }
